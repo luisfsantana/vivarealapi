@@ -1,0 +1,286 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Viva Real API
+  description: Viva Real API Code Challenge
+schemes:
+  - https
+host: vivareal.api
+basePath: /v1
+paths:
+  /properties:
+    get:
+      summary: Gets some properties
+      description: Returns a list containing all properties in area.
+      parameters:
+       - name: ax
+         in: query
+         description: Top right ax
+         type: integer
+       - name: ay
+         in: query
+         description: Top right ay
+         type: integer
+       - name: bx
+         in: query
+         description: Lower left bx
+         type: integer
+       - name: by
+         in: query
+         description: Lower left by
+         type: integer     
+      responses:
+        200:
+          description: A list of Properties
+          schema:
+            $ref: "#/definitions/Properties"
+        500:
+          $ref: "#/responses/Standard500ErrorResponse"
+
+    post:
+      summary: Creates a property
+      description: Adds a new property to the properties list.
+      parameters:
+        - name: property
+          in: body
+          description: The property to create.
+          schema:
+            $ref: "#/definitions/Property"
+      responses:
+        201:
+          $ref: "#/responses/PropertyCreatedResponse"
+        400:
+          $ref: "#/responses/PropertyDoesNotExistResponse"
+        500:
+          $ref: "#/responses/Standard500ErrorResponse"
+
+  /properties/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The person's id
+        type: string
+    get:
+      summary: Gets a property
+      description: Returns a single property for its id.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id's property
+          type: string
+      responses:
+        200:
+          description: A property
+          schema:
+            $ref: "#/definitions/Property"
+        404:
+          $ref: "#/responses/PropertyDoesNotExistResponse"
+        500:
+          $ref: "#/responses/Standard500ErrorResponse"
+  /loadprovinces:
+    post:
+      summary: Upload the provinces
+      description: loadprovinces 
+      parameters:
+        - name: province
+          in: body
+          required: true
+          description: province
+          schema:
+           $ref: "#/definitions/Provinces"
+      responses:
+        201:
+          description: Created
+        401: 
+          description: Unauthorized
+        403: 
+          description: Forbidden
+        404: 
+          description: Not Found
+  /loadproperties:
+    post:
+      summary: Upload the properties
+      description: loadproperties
+      parameters:
+        - name: properties
+          in: body
+          required: true
+          description: list properties
+          schema:
+            $ref: "#/definitions/PropertyLoad"
+      responses:
+        201:
+          description: Created
+        401: 
+          description: Unauthorized
+        403: 
+          description: Forbidden
+        404: 
+          description: Not Found
+definitions:
+  PropertyRequest:
+    properties:
+      id:
+        type: integer
+      title: 
+        type: string
+      price: 
+        type: integer
+      description:
+        type: string
+      lat: 
+        type: integer
+      long: 
+        type: integer
+      beds: 
+        type: integer
+        minimum: 1
+        maximum: 5
+      baths:
+        type: integer
+        minimum: 1
+        maximum: 4
+      squareMeters:
+        type: integer
+        minimum: 20
+        maximum: 240
+  PropertyLoad:
+    required:
+      - totalProperties 
+      - properties
+    properties:
+      totalProperties:
+        type: integer
+      properties:
+        type: array
+        items:
+          $ref: "#/definitions/PropertyRequest"
+  Provinces:
+    required:
+      - name
+      - ax
+      - ay
+      - bx
+      - by   
+    properties:
+      name:
+        type: string
+      ax:
+        type: integer
+      ay:
+        type: integer
+      bx:
+        type: integer
+      by:
+        type: integer
+  PropertyCreated:
+    required:
+      - id 
+      - title
+      - price
+      - description
+      - x
+      - y
+      - beds
+      - baths
+      - provinces
+      - squareMeters
+    properties:
+      id:
+        type: integer
+      title:
+        type: string
+        minLength: 1
+      price:
+        type: integer  
+      description:
+        type: string
+      x:
+        type: integer
+        minimum: 0
+        maximum: 1400
+      y:
+        type: integer
+        minimum: 1
+        maximum: 1000
+      beds:
+        type: integer
+        minimum: 1
+        maximum: 5
+      baths:
+        type: integer  
+        minimum: 1
+        maximum: 4
+      provinces:
+        type: array
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/Provinces"
+      squareMeters:
+        type: integer  
+        minimum: 20
+        maximum: 240
+  Property:
+    required:
+      - x
+      - y
+      - title
+      - price
+      - description
+      - beds
+      - baths
+      - squareMeters
+    properties:
+      x:
+        type: integer
+        minimum: 0
+        maximum: 1400
+      y:
+        type: integer
+        minimum: 0
+        maximum: 1000
+      title:
+        type: string
+        minLength: 1
+      price:
+        type: integer  
+      description:
+        type: string
+      beds:
+        type: integer
+        minimum: 1
+        maximum: 5
+      baths:
+        type: integer  
+        minimum: 1
+        maximum: 4
+      squareMeters:
+        type: integer
+        minimum: 20
+        maximum: 240
+  Properties:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: "#/definitions/Property"
+      
+  Error:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+        
+responses:
+  PropertyCreatedResponse:
+    description: Created
+    schema:
+      $ref: "#/definitions/PropertyCreated"
+  Standard500ErrorResponse:
+    description: An unexpected error occured.
+    schema:
+      $ref: "#/definitions/Error"
+  PropertyDoesNotExistResponse:
+    description: Property does not exist.      
